@@ -10,6 +10,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):    #swagger problem
+            return Task.objects.none()
         # First security layer: users only see their own tasks
         return Task.objects.filter(user=self.request.user).order_by('-created_at')
 
@@ -24,5 +26,7 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()   # Needed for object-permission checking
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Task.objects.none()
         # Second security layer: limit DB queries to user-owned tasks
         return Task.objects.filter(user=self.request.user)
